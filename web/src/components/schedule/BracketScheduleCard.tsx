@@ -32,6 +32,8 @@ import {
 } from "../../utils/bracketSchedule";
 import { getMatchRoundLabel } from "../bracket/analysis";
 import BracketScheduleModal, { ScheduleApi } from "./BracketScheduleModal";
+import ScheduleViews from "./ScheduleViews";
+import { bracketEntries } from "./scheduleEntries";
 
 const { Text } = Typography;
 
@@ -241,7 +243,12 @@ const BracketScheduleCard: React.FC<BracketScheduleCardProps> = ({
             </Text>
             {venues.size > 0 && (
               <Text type="secondary">
-                场地：{Array.from(venues).join("、")}
+                场地：
+                {Array.from(venues)
+                  .sort((a, b) =>
+                    a.localeCompare(b, "zh-CN", { numeric: true }),
+                  )
+                  .join("、")}
               </Text>
             )}
           </Space>
@@ -253,13 +260,33 @@ const BracketScheduleCard: React.FC<BracketScheduleCardProps> = ({
               title={`有 ${conflicts.size} 场比赛存在时间冲突（按每场 ${minutes} 分钟估算），请调整或重新自动排期`}
             />
           )}
-          <Table
-            size="small"
-            rowKey="id"
-            columns={columns}
-            dataSource={rows}
-            pagination={false}
-            scroll={{ x: "max-content", y: 420 }}
+          <ScheduleViews
+            tone="admin"
+            entries={bracketEntries({
+              matches,
+              participants,
+              matchesBySeq,
+              minutes,
+              groupName: bracket.name,
+              conflicts,
+              // 日历 / 甘特图中点击比赛：调整时间与场地（待定比赛双方未齐，不可录入）
+              onPick: onEditMatch
+                ? (m) => {
+                    if (m.status !== "pending") onEditMatch(m);
+                  }
+                : undefined,
+            })}
+            unscheduled={rows.length - scheduledCount}
+            renderList={() => (
+              <Table
+                size="small"
+                rowKey="id"
+                columns={columns}
+                dataSource={rows}
+                pagination={false}
+                scroll={{ x: "max-content", y: 420 }}
+              />
+            )}
           />
         </>
       )}

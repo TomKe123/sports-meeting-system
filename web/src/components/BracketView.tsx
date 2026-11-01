@@ -31,6 +31,12 @@ import MatchMenu, { MatchMenuAnchor, MatchMenuItem } from "./bracket/MatchMenu";
 import SelectableRow from "./bracket/SelectableRow";
 import PanZoomCanvas from "./bracket/PanZoomCanvas";
 import ScheduleList from "./bracket/ScheduleList";
+import ScheduleViews from "./schedule/ScheduleViews";
+import { bracketEntries } from "./schedule/scheduleEntries";
+import {
+  DEFAULT_MATCH_MINUTES,
+  isSchedulable as isSchedulableMatch,
+} from "../utils/bracketSchedule";
 import RoundPicker, { RoundStage } from "./bracket/RoundPicker";
 import {
   MatchAnalysisSheet,
@@ -1290,16 +1296,36 @@ const BracketView: React.FC<BracketViewProps> = ({
 
   // 赛程页签：有比赛排了时间才显示
   if (matches.some((m) => m.scheduled_at)) {
+    const onOpenMenu = (match: BracketMatch, element: HTMLElement) =>
+      openMenu(match, { element, returnFocus: element }, true);
     const renderSchedule = () => (
-      <ScheduleList
-        matches={matches}
-        participants={participants}
-        matchesBySeq={matchesBySeq}
-        selectedId={selectedId}
-        menuSeq={menu?.seq ?? null}
-        onOpenMenu={(match, element) =>
-          openMenu(match, { element, returnFocus: element }, true)
+      <ScheduleViews
+        tone="public"
+        summary
+        entries={bracketEntries({
+          matches,
+          participants,
+          matchesBySeq,
+          minutes:
+            bracket.schedule_config?.match_minutes ?? DEFAULT_MATCH_MINUTES,
+          groupName: bracket.name,
+          selectedId,
+          activeSeq: menu?.seq ?? null,
+          onPick: onOpenMenu,
+        })}
+        unscheduled={
+          matches.filter((m) => !m.scheduled_at && isSchedulableMatch(m)).length
         }
+        renderList={() => (
+          <ScheduleList
+            matches={matches}
+            participants={participants}
+            matchesBySeq={matchesBySeq}
+            selectedId={selectedId}
+            menuSeq={menu?.seq ?? null}
+            onOpenMenu={onOpenMenu}
+          />
+        )}
       />
     );
     tabs.push({

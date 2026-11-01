@@ -20,7 +20,9 @@ export const SCHOOL_NAME = "上海市行知中学";
 
 export interface PublicTopBarProps {
   brackets: Bracket[];
-  // 当前页面：undefined 表示成绩看板
+  // 当前页面：不传时有 currentBracketId 为对阵图页，否则为成绩看板
+  page?: "home" | "bracket" | "schedule";
+  // 对阵图页当前的对阵表
   currentBracketId?: number;
   currentDetail?: BracketDetail | null;
   // “分析队伍”：不可用时为 undefined
@@ -42,6 +44,7 @@ export interface PublicTopBarProps {
 type MenuKey = "analyze" | "comment" | "refresh" | "account" | "about";
 
 export default function PublicTopBar({
+  page: pageProp,
   brackets,
   currentBracketId,
   currentDetail,
@@ -66,8 +69,9 @@ export default function PublicTopBar({
   const [aboutOpen, setAboutOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // 对阵图为独立入口：看板页只显示「对阵图」按钮，对阵图页才有对阵表选择
-  const onBracketPage = currentBracketId != null;
+  // 对阵图、赛程为独立入口：对阵图页才有对阵表选择
+  const page = pageProp ?? (currentBracketId != null ? "bracket" : "home");
+  const onBracketPage = page === "bracket";
   const bracketOptions = useMemo(
     () => brackets.map((b) => ({ value: String(b.id), label: b.name })),
     [brackets],
@@ -176,7 +180,7 @@ export default function PublicTopBar({
         <div className="pt-spacer" />
 
         <div className="pt-actions">
-          {onBracketPage ? (
+          {page !== "home" && (
             <button
               type="button"
               className="pt-entry-btn"
@@ -187,19 +191,30 @@ export default function PublicTopBar({
               <MdiIcon path={MDI.dashboard} />
               <span className="pt-entry-text">成绩看板</span>
             </button>
-          ) : (
-            brackets.length > 0 && (
-              <button
-                type="button"
-                className="pt-entry-btn"
-                onClick={() => navigate(`/brackets/${brackets[0].id}`)}
-                aria-label="对阵图"
-                title="对阵图"
-              >
-                <MdiIcon path={MDI.tournament} />
-                <span className="pt-entry-text">对阵图</span>
-              </button>
-            )
+          )}
+          {page !== "schedule" && (
+            <button
+              type="button"
+              className="pt-entry-btn"
+              onClick={() => navigate("/schedule")}
+              aria-label="赛程"
+              title="赛程"
+            >
+              <MdiIcon path={MDI.calendar} />
+              <span className="pt-entry-text">赛程</span>
+            </button>
+          )}
+          {page !== "bracket" && brackets.length > 0 && (
+            <button
+              type="button"
+              className="pt-entry-btn"
+              onClick={() => navigate(`/brackets/${brackets[0].id}`)}
+              aria-label="对阵图"
+              title="对阵图"
+            >
+              <MdiIcon path={MDI.tournament} />
+              <span className="pt-entry-text">对阵图</span>
+            </button>
           )}
           <button
             type="button"

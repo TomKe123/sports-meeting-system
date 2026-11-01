@@ -831,6 +831,12 @@
     display: none;
   }
 
+  /* 三个入口按钮时收窄，避免与搜索 / 更多挤出屏幕 */
+  .pt-actions .pt-entry-btn {
+    width: 40px;
+    height: 40px;
+  }
+
   .pt-bar {
     background:
       linear-gradient(

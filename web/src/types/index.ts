@@ -307,6 +307,28 @@ export interface BracketSchedulePlan {
   warnings: string[];
 }
 
+// 首页赛程条目：比赛项目整体时段，或对阵图中已排期的一场比赛
+export interface PublicScheduleItem {
+  kind: "competition" | "match";
+  competition_id: number;
+  competition_name: string;
+  competition_status: string;
+  bracket_id?: number;
+  match_id?: number;
+  match_seq?: number;
+  round_label?: string;
+  match_status?: BracketMatchStatus;
+  side1?: string;
+  side2?: string;
+  score1?: number | null;
+  score2?: number | null;
+  winner_side?: number; // 1 或 2；平局或未完赛为 0
+  start_at: string;
+  end_at: string;
+  end_estimated?: boolean; // 项目未填结束时间，按 1 小时估算
+  venue: string;
+}
+
 export interface BracketParticipant {
   id: number;
   bracket_id: number;

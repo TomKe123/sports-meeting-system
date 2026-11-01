@@ -8,6 +8,7 @@ import {
   Registration,
   Bracket,
   BracketDetail,
+  PublicScheduleItem,
 } from "../types";
 
 /**
@@ -133,6 +134,13 @@ export const publicAPI = {
    */
   getBrackets: async (): Promise<ApiResponse<Bracket[]>> => {
     return await callApi(() => publicApi.get("/brackets"));
+  },
+
+  /**
+   * 当前届次赛程：项目时段与已排期的对阵比赛（首页日历与甘特图）
+   */
+  getSchedule: async (): Promise<ApiResponse<PublicScheduleItem[]>> => {
+    return await callApi(() => publicApi.get("/schedule"));
   },
 
   /**

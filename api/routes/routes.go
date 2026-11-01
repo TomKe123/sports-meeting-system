@@ -92,6 +92,8 @@ func SetupRouter(staticFS fs.FS) *gin.Engine {
 	// 对阵图（仅返回已公开的对阵表）
 	dashboard.GET("/brackets", handlers.GetPublicBrackets)
 	dashboard.GET("/brackets/:id", handlers.GetPublicBracket)
+	// 赛程（首页日历与甘特图）
+	dashboard.GET("/schedule", handlers.GetPublicSchedule)
 
 	// 认证API路由
 	api.POST("/login", handlers.Login)
