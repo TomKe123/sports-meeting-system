@@ -774,6 +774,8 @@ func respondBracketError(c *gin.Context, err error) {
 		utils.ResponseError(c, http.StatusConflict, err.Error())
 	case isBracketValidationError(err):
 		utils.ResponseError(c, http.StatusBadRequest, err.Error())
+	case services.IsScheduleError(err):
+		utils.ResponseError(c, http.StatusBadRequest, err.Error())
 	case services.IsRadarStatsError(err):
 		utils.ResponseError(c, http.StatusBadRequest, err.Error())
 	default:

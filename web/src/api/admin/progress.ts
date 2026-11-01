@@ -7,6 +7,8 @@ import {
   Score,
   StudentScore,
   BracketDetail,
+  BracketScheduleConfig,
+  BracketSchedulePlan,
   ApiResponse,
   PaginatedResponse,
 } from "../../types";
@@ -48,6 +50,44 @@ export const adminProgressAPI = {
         `/admin/progress/${competitionId}/bracket/matches/${matchId}`,
         data,
       ),
+    );
+  },
+
+  /**
+   * 预览比赛项目对阵的自动排期（不保存）
+   */
+  previewBracketSchedule: async (
+    competitionId: number,
+    data: BracketScheduleConfig,
+  ): Promise<ApiResponse<BracketSchedulePlan>> => {
+    return await callApi(() =>
+      api.post(
+        `/admin/progress/${competitionId}/bracket/schedule/preview`,
+        data,
+      ),
+    );
+  },
+
+  /**
+   * 为比赛项目对阵自动排期并保存
+   */
+  applyBracketSchedule: async (
+    competitionId: number,
+    data: BracketScheduleConfig,
+  ): Promise<ApiResponse<BracketSchedulePlan>> => {
+    return await callApi(() =>
+      api.post(`/admin/progress/${competitionId}/bracket/schedule`, data),
+    );
+  },
+
+  /**
+   * 清除比赛项目对阵中未完赛比赛的排期
+   */
+  clearBracketSchedule: async (
+    competitionId: number,
+  ): Promise<ApiResponse<{ cleared: number }>> => {
+    return await callApi(() =>
+      api.delete(`/admin/progress/${competitionId}/bracket/schedule`),
     );
   },
 

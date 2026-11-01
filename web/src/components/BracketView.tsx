@@ -30,6 +30,7 @@ import championImg from "../assets/rm/champion.png";
 import MatchMenu, { MatchMenuAnchor, MatchMenuItem } from "./bracket/MatchMenu";
 import SelectableRow from "./bracket/SelectableRow";
 import PanZoomCanvas from "./bracket/PanZoomCanvas";
+import ScheduleList from "./bracket/ScheduleList";
 import RoundPicker, { RoundStage } from "./bracket/RoundPicker";
 import {
   MatchAnalysisSheet,
@@ -1003,6 +1004,8 @@ interface ViewTab {
   live: boolean;
   // 移动端轮次选择器的各轮
   stages: RoundStage[];
+  // 列表类页签（赛程）：不放入可缩放画布，也不参与默认页签选择
+  plain?: boolean;
   renderDesktop: () => React.ReactNode;
   renderMobile: (range: {
     start: number;
@@ -1285,7 +1288,35 @@ const BracketView: React.FC<BracketViewProps> = ({
     return <Empty description="对阵尚未生成" />;
   }
 
-  const fallback = (tabs.find((t) => t.live) ?? tabs[tabs.length - 1]).key;
+  // 赛程页签：有比赛排了时间才显示
+  if (matches.some((m) => m.scheduled_at)) {
+    const renderSchedule = () => (
+      <ScheduleList
+        matches={matches}
+        participants={participants}
+        matchesBySeq={matchesBySeq}
+        selectedId={selectedId}
+        menuSeq={menu?.seq ?? null}
+        onOpenMenu={(match, element) =>
+          openMenu(match, { element, returnFocus: element }, true)
+        }
+      />
+    );
+    tabs.push({
+      key: "schedule",
+      label: "赛程",
+      live: false,
+      plain: true,
+      stages: [],
+      renderDesktop: renderSchedule,
+      renderMobile: renderSchedule,
+    });
+  }
+
+  const boardTabs = tabs.filter((t) => !t.plain);
+  const fallback = (
+    boardTabs.find((t) => t.live) ?? boardTabs[boardTabs.length - 1]
+  ).key;
   const activeKey =
     picked && picked.id === bracket.id && tabs.some((t) => t.key === picked.key)
       ? picked.key
@@ -1443,17 +1474,21 @@ const BracketView: React.FC<BracketViewProps> = ({
             className="bv-stage"
             role={tabs.length > 1 ? "tabpanel" : undefined}
           >
-            <PanZoomCanvas
-              key={windowKey}
-              label={`${bracket.name} ${active.label}对阵图`}
-              exportName={`${bracket.name}-${active.label}`}
-              fullscreen={fullscreen.active}
-              canFullscreen={fullscreen.supported}
-              onToggleFullscreen={fullscreen.toggle}
-              onInteract={dismissMenu}
-            >
-              {active.renderDesktop()}
-            </PanZoomCanvas>
+            {active.plain ? (
+              active.renderDesktop()
+            ) : (
+              <PanZoomCanvas
+                key={windowKey}
+                label={`${bracket.name} ${active.label}对阵图`}
+                exportName={`${bracket.name}-${active.label}`}
+                fullscreen={fullscreen.active}
+                canFullscreen={fullscreen.supported}
+                onToggleFullscreen={fullscreen.toggle}
+                onInteract={dismissMenu}
+              >
+                {active.renderDesktop()}
+              </PanZoomCanvas>
+            )}
           </div>
         </>
       ) : (
@@ -1493,19 +1528,25 @@ const BracketView: React.FC<BracketViewProps> = ({
             />
           )}
           {championBanner}
-          <div
-            ref={board.ref}
-            className="bv-stage bv-board"
-            role={tabs.length > 1 ? "tabpanel" : undefined}
-            {...swipeHandlers}
-          >
-            {board.width > 0 &&
-              active.renderMobile({
-                start: windowStart,
-                span,
-                width: board.width,
-              })}
-          </div>
+          {active.plain ? (
+            <div className="bv-stage" role="tabpanel">
+              {active.renderMobile({ start: 0, span: 0, width: 0 })}
+            </div>
+          ) : (
+            <div
+              ref={board.ref}
+              className="bv-stage bv-board"
+              role={tabs.length > 1 ? "tabpanel" : undefined}
+              {...swipeHandlers}
+            >
+              {board.width > 0 &&
+                active.renderMobile({
+                  start: windowStart,
+                  span,
+                  width: board.width,
+                })}
+            </div>
+          )}
         </>
       )}
 

@@ -5,6 +5,8 @@ import {
   BracketDetail,
   BracketFormat,
   BracketParticipantType,
+  BracketScheduleConfig,
+  BracketSchedulePlan,
   Class,
   Competition,
   PaginatedResponse,
@@ -174,6 +176,39 @@ export const adminBracketAPI = {
         values,
       }),
     );
+  },
+
+  /**
+   * 预览自动排期（不保存）
+   */
+  previewSchedule: async (
+    id: number,
+    data: BracketScheduleConfig,
+  ): Promise<ApiResponse<BracketSchedulePlan>> => {
+    return await callApi(() =>
+      api.post(`/admin/brackets/${id}/schedule/preview`, data),
+    );
+  },
+
+  /**
+   * 自动排期并保存
+   */
+  applySchedule: async (
+    id: number,
+    data: BracketScheduleConfig,
+  ): Promise<ApiResponse<BracketSchedulePlan>> => {
+    return await callApi(() =>
+      api.post(`/admin/brackets/${id}/schedule`, data),
+    );
+  },
+
+  /**
+   * 清除未完赛比赛的时间与场地
+   */
+  clearSchedule: async (
+    id: number,
+  ): Promise<ApiResponse<{ cleared: number }>> => {
+    return await callApi(() => api.delete(`/admin/brackets/${id}/schedule`));
   },
 
   updateMatch: async (

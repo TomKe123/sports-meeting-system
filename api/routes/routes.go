@@ -174,6 +174,9 @@ func SetupRouter(staticFS fs.FS) *gin.Engine {
 	progressMgmt.GET("/:id/bracket", handlers.GetCompetitionBracket)
 	progressMgmt.PUT("/:id/bracket/matches/:match_id", handlers.UpdateCompetitionBracketMatch)
 	progressMgmt.POST("/:id/bracket/complete", handlers.CompleteCompetitionFromBracket)
+	progressMgmt.POST("/:id/bracket/schedule/preview", handlers.PreviewCompetitionSchedule)
+	progressMgmt.POST("/:id/bracket/schedule", handlers.ApplyCompetitionSchedule)
+	progressMgmt.DELETE("/:id/bracket/schedule", handlers.ClearCompetitionSchedule)
 	progressScores := progressMgmt.Group("/scores")
 	progressScores.POST("", handlers.CreateOrUpdateScores)
 	progressScores.GET("/:id", handlers.GetCompetitionScores)
@@ -219,6 +222,9 @@ func SetupRouter(staticFS fs.FS) *gin.Engine {
 	bracketMgmt.POST("/:id/reset", handlers.ResetBracket)
 	bracketMgmt.PUT("/:id/matches/:match_id", handlers.UpdateBracketMatch)
 	bracketMgmt.PUT("/:id/radar", handlers.UpdateBracketRadar)
+	bracketMgmt.POST("/:id/schedule/preview", handlers.PreviewBracketSchedule)
+	bracketMgmt.POST("/:id/schedule", handlers.ApplyBracketSchedule)
+	bracketMgmt.DELETE("/:id/schedule", handlers.ClearBracketSchedule)
 	bracketMgmt.PUT("/:id/participants/:participant_id/radar", handlers.SetParticipantRadar)
 
 	// 系统设置（需要网站管理权限）

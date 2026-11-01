@@ -58,29 +58,35 @@ const GroupRankRefBase = 1000
 
 // Bracket 对阵表
 type Bracket struct {
-	ID              int                    `json:"id"                         gorm:"primaryKey;autoIncrement"`
-	EventID         int                    `json:"event_id"                   gorm:"not null;index"`
-	CompetitionID   *int                   `json:"competition_id,omitempty"   gorm:"index"` // 关联的比赛项目（可选）
-	Name            string                 `json:"name"                       gorm:"not null"`
-	Description     string                 `json:"description"                gorm:"default:''"`
-	Format          BracketFormat          `json:"format"                     gorm:"not null"`
-	ParticipantType BracketParticipantType `json:"participant_type"           gorm:"not null"`
-	GroupCount      int                    `json:"group_count"                gorm:"not null;default:1"` // 小组数量（循环赛/小组赛）
-	AdvancePerGroup int                    `json:"advance_per_group"          gorm:"not null;default:2"` // 每组出线数量（小组赛 + 淘汰赛）
-	ThirdPlaceMatch bool                   `json:"third_place_match"          gorm:"default:false"`      // 是否进行季军赛
-	PointsWin       int                    `json:"points_win"                 gorm:"not null;default:3"` // 循环赛胜场积分
-	PointsDraw      int                    `json:"points_draw"                gorm:"not null;default:1"` // 循环赛平局积分
-	PointsLoss      int                    `json:"points_loss"                gorm:"not null;default:0"` // 循环赛负场积分
-	Published       bool                   `json:"published"                  gorm:"default:false"`      // 是否在公开看板展示
-	RadarConfig     *RadarConfig           `json:"radar_config"               gorm:"serializer:json"`    // 雷达图配置，为空表示未启用
+	ID              int                    `json:"id"                       gorm:"primaryKey;autoIncrement"`
+	EventID         int                    `json:"event_id"                 gorm:"not null;index"`
+	CompetitionID   *int                   `json:"competition_id,omitempty" gorm:"index"` // 关联的比赛项目（可选）
+	Name            string                 `json:"name"                     gorm:"not null"`
+	Description     string                 `json:"description"              gorm:"default:''"`
+	Format          BracketFormat          `json:"format"                   gorm:"not null"`
+	ParticipantType BracketParticipantType `json:"participant_type"         gorm:"not null"`
+	GroupCount      int                    `json:"group_count"              gorm:"not null;default:1"` // 小组数量（循环赛/小组赛）
+	AdvancePerGroup int                    `json:"advance_per_group"        gorm:"not null;default:2"` // 每组出线数量（小组赛 + 淘汰赛）
+	ThirdPlaceMatch bool                   `json:"third_place_match"        gorm:"default:false"`      // 是否进行季军赛
+	PointsWin       int                    `json:"points_win"               gorm:"not null;default:3"` // 循环赛胜场积分
+	PointsDraw      int                    `json:"points_draw"              gorm:"not null;default:1"` // 循环赛平局积分
+	PointsLoss      int                    `json:"points_loss"              gorm:"not null;default:0"` // 循环赛负场积分
+	Published       bool                   `json:"published"                gorm:"default:false"`      // 是否在公开看板展示
+	RadarConfig     *RadarConfig           `json:"radar_config"             gorm:"serializer:json"`    // 雷达图配置，为空表示未启用
+	// 最近一次自动排期使用的参数，为空表示从未自动排期
+	ScheduleConfig  *BracketScheduleConfig `json:"schedule_config,omitempty"  gorm:"serializer:json"`
 	CompetitionName string                 `json:"competition_name,omitempty" gorm:"-"`
 	// 所属比赛项目是否启用对阵图；关联项目关闭对阵图后，对阵表在公开端隐藏、不再参与成绩
 	CompetitionBracketEnabled bool              `json:"competition_bracket_enabled"  gorm:"-"`
 	CompetitionStatus         CompetitionStatus `json:"competition_status,omitempty" gorm:"-"`
-	ParticipantNum            int               `json:"participant_count"            gorm:"-"`
-	MatchNum                  int               `json:"match_count"                  gorm:"-"`
-	CreatedAt                 time.Time         `json:"created_at"`
-	UpdatedAt                 time.Time         `json:"updated_at"`
+	// 所属比赛项目的时间与地点（排期默认值）
+	CompetitionStartTime *time.Time `json:"competition_start_time,omitempty" gorm:"-"`
+	CompetitionEndTime   *time.Time `json:"competition_end_time,omitempty"   gorm:"-"`
+	CompetitionVenue     string     `json:"competition_venue,omitempty"      gorm:"-"`
+	ParticipantNum       int        `json:"participant_count"                gorm:"-"`
+	MatchNum             int        `json:"match_count"                      gorm:"-"`
+	CreatedAt            time.Time  `json:"created_at"`
+	UpdatedAt            time.Time  `json:"updated_at"`
 
 	// 关联关系，不响应到前端
 	Event        *Event               `json:"-" gorm:"foreignKey:EventID"`

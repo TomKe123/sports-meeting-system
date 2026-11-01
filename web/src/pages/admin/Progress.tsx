@@ -64,6 +64,7 @@ import CertificateExport from "../../components/CertificateExport";
 import ScorePrintModal from "../../components/ScorePrintModal";
 import BracketView from "../../components/BracketView";
 import BracketMatchModal from "../../components/BracketMatchModal";
+import BracketScheduleCard from "../../components/schedule/BracketScheduleCard";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -1382,6 +1383,38 @@ const Progress: React.FC = () => {
           )}
         </Card>
       )}
+
+      {selectedCompetition &&
+        isBracket &&
+        bracketDetail &&
+        bracketDetail.matches.length > 0 && (
+          <BracketScheduleCard
+            detail={bracketDetail}
+            style={{ marginBottom: 24 }}
+            api={
+              canManageProgress
+                ? {
+                    preview: (data) =>
+                      adminProgressAPI.previewBracketSchedule(
+                        selectedCompetition.id,
+                        data,
+                      ),
+                    apply: (data) =>
+                      adminProgressAPI.applyBracketSchedule(
+                        selectedCompetition.id,
+                        data,
+                      ),
+                    clear: () =>
+                      adminProgressAPI.clearBracketSchedule(
+                        selectedCompetition.id,
+                      ),
+                  }
+                : undefined
+            }
+            onEditMatch={canManageProgress ? setEditingMatch : undefined}
+            onChanged={() => void fetchBracket(selectedCompetition.id)}
+          />
+        )}
 
       {bracketDetail && (
         <BracketMatchModal

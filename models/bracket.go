@@ -38,6 +38,11 @@ func UpdateBracketRadarConfig(bracket *types.Bracket) error {
 	return database.GetDB().Model(bracket).Select("RadarConfig").Updates(bracket).Error
 }
 
+// UpdateBracketScheduleConfig 保存最近一次自动排期参数
+func UpdateBracketScheduleConfig(bracket *types.Bracket) error {
+	return database.GetDB().Model(bracket).Select("ScheduleConfig").Updates(bracket).Error
+}
+
 // SaveParticipantRadarManual 保存参赛方的手动雷达评分（为空表示清除）
 func SaveParticipantRadarManual(participantID int, manual map[string]float64) error {
 	return database.GetDB().Model(&types.BracketParticipant{ID: participantID}).
@@ -181,7 +186,7 @@ func fillBracketCompetitionNames(brackets []*types.Bracket) {
 		return
 	}
 	var competitions []types.Competition
-	if err := database.GetDB().Select("id", "name", "bracket_enabled", "status").
+	if err := database.GetDB().Select("id", "name", "bracket_enabled", "status", "start_time", "end_time", "venue").
 		Where("id IN ?", ids).Find(&competitions).Error; err != nil {
 		return
 	}
@@ -197,6 +202,9 @@ func fillBracketCompetitionNames(brackets []*types.Bracket) {
 		b.CompetitionName = c.Name
 		b.CompetitionBracketEnabled = c.BracketEnabled
 		b.CompetitionStatus = c.Status
+		b.CompetitionStartTime = c.StartTime
+		b.CompetitionEndTime = c.EndTime
+		b.CompetitionVenue = c.Venue
 	}
 }
 
@@ -421,6 +429,21 @@ func SaveBracketMatches(matches []*types.BracketMatch) error {
 				"P1ID", "P2ID", "Score1", "Score2", "WinnerID", "IsDraw", "Completed",
 				"Status", "ScheduledAt", "Venue", "Note", "Stats1", "Stats2",
 			).Updates(m).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+// SaveBracketMatchSchedules 仅写回比赛的时间与场地（排期不改动比分与参赛方）
+func SaveBracketMatchSchedules(matches []*types.BracketMatch) error {
+	if len(matches) == 0 {
+		return nil
+	}
+	return database.GetDB().Transaction(func(tx *gorm.DB) error {
+		for _, m := range matches {
+			if err := tx.Model(m).Select("ScheduledAt", "Venue").Updates(m).Error; err != nil {
 				return err
 			}
 		}

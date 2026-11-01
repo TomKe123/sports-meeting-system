@@ -269,10 +269,42 @@ export interface Bracket {
   points_loss: number;
   published: boolean;
   radar_config?: RadarConfig | null; // 雷达图配置，为空表示未启用
+  schedule_config?: BracketScheduleConfig | null; // 最近一次自动排期参数
+  competition_start_time?: string; // 所属项目时间与地点（排期默认值）
+  competition_end_time?: string;
+  competition_venue?: string;
   participant_count: number;
   match_count: number;
   created_at: string;
   updated_at: string;
+}
+
+// 自动排期参数
+export interface BracketScheduleConfig {
+  start_at: string; // RFC3339
+  match_minutes: number; // 每场占用时长
+  gap_minutes: number; // 同一场地两场间隔
+  rest_minutes: number; // 同一参赛方两场之间至少休息
+  venues: string[];
+  day_start: string; // HH:MM，为空表示不限
+  day_end: string;
+  keep_scheduled: boolean; // 保留已排期比赛
+}
+
+export interface BracketScheduleItem {
+  match_id: number;
+  scheduled_at: string;
+  end_at: string;
+  venue: string;
+  fixed: boolean; // 保留的原有排期
+}
+
+export interface BracketSchedulePlan {
+  items: BracketScheduleItem[];
+  first_at?: string;
+  last_end?: string;
+  days: number;
+  warnings: string[];
 }
 
 export interface BracketParticipant {

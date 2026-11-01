@@ -52,6 +52,7 @@ import BracketFormModal from "../../components/BracketFormModal";
 import BracketMatchModal from "../../components/BracketMatchModal";
 import RadarConfigModal from "../../components/radar/RadarConfigModal";
 import RadarManualModal from "../../components/radar/RadarManualModal";
+import BracketScheduleCard from "../../components/schedule/BracketScheduleCard";
 import {
   RADAR_FORMULA_NOTE,
   RADAR_PRESET_LABELS,
@@ -537,6 +538,18 @@ const BracketDetail: React.FC = () => {
           </Empty>
         )}
       </Card>
+
+      <BracketScheduleCard
+        detail={detail}
+        style={{ marginBottom: 16 }}
+        api={{
+          preview: (data) => adminBracketAPI.previewSchedule(bracketId, data),
+          apply: (data) => adminBracketAPI.applySchedule(bracketId, data),
+          clear: () => adminBracketAPI.clearSchedule(bracketId),
+        }}
+        onEditMatch={setEditingMatch}
+        onChanged={fetchDetail}
+      />
 
       <Card title="对阵图">
         {generated && (
