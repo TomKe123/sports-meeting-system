@@ -18,7 +18,6 @@
   --ph-logo: 30px;
   --ph-pad-x: 24px;
   --ph-gap: 20px;
-  --ph-header-h: 64px;
 
   position: relative;
   z-index: 1;
@@ -45,130 +44,12 @@
   border: 0;
 }
 
-/* ==== 顶栏：RM 的 glass-sheet，左侧信息块仿 Season / Zone 选择框 ==== */
-.ph-header {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  gap: 16px;
-  min-width: 0;
-  height: var(--ph-header-h);
-  padding: env(safe-area-inset-top, 0px) 8px 0 0;
-  box-sizing: content-box;
-}
-.ph-brand {
-  display: flex;
-  align-items: stretch;
-  flex: 1 1 auto;
-  min-width: 0;
-  cursor: default;
-  user-select: none;
-}
-.ph-emblem {
-  align-self: center;
-  width: 36px;
-  height: 36px;
-  flex: 0 0 auto;
-  margin: 0 12px 0 16px;
-  padding: 2px;
-  object-fit: contain;
-  /* 校徽本身不改，衬白色圆底（同 RM 的白色 v-avatar） */
-  border-radius: 50%;
-  background: #fff;
-  box-sizing: content-box;
-}
-/* Vuetify filled 选择框：浅色填充底 + 小号标签在上、取值在下 */
-.ph-field-block {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  flex: 0 0 auto;
-  min-width: 120px;
-  padding: 6px 16px 4px;
-  background: rgba(255, 255, 255, 0.04);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.38);
-}
-.ph-field-block--grow {
-  flex: 0 1 auto;
-  min-width: 0;
-  max-width: 420px;
-}
-.ph-field-label {
-  color: var(--ph-muted);
-  font-size: 12px;
-  line-height: 16px;
-  letter-spacing: 0.009em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.ph-field-value {
-  margin: 2px 0 0;
-  overflow: hidden;
-  color: #fff;
-  font-family: "MyFont", sans-serif;
-  font-size: 17px;
-  font-weight: normal;
-  line-height: 24px;
-  letter-spacing: 0.009em;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.ph-side {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex: 0 0 auto;
-}
-/* Vuetify v-btn variant="flat" color="transparent"：无边框，悬停叠加白色 */
-.ph-login {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 16px;
-  overflow: hidden;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  color: #fff;
-  font-family: "MyFont", sans-serif;
-  font-size: 16px;
-  letter-spacing: 0.0892857143em;
-  white-space: nowrap;
-  cursor: pointer;
-}
-.ph-login::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: currentColor;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease-in-out;
-}
-.ph-login:hover::after {
-  opacity: 0.08;
-}
-.ph-login:active::after {
-  opacity: 0.16;
-}
-.ph-login:focus-visible,
+/* 顶栏由 public/PublicTopBar 提供 */
 .ph-action:focus-visible,
 .ph-entry:focus-visible,
 .ph-event:focus-visible {
   outline: 2px solid #2196f3;
   outline-offset: 2px;
-}
-.ph-login svg {
-  width: 24px;
-  height: 24px;
-  flex: 0 0 auto;
-  fill: currentColor;
 }
 
 /* ==== 主体：榜单 2 栏 + 赛场动态 1 栏 ==== */
@@ -542,7 +423,6 @@
   .ph-shell {
     --ph-row-h: 38px;
     --ph-logo: 26px;
-    --ph-header-h: 56px;
   }
   .ph-heading {
     height: 42px;
@@ -594,25 +474,8 @@
   .ph-shell {
     --ph-pad-x: 10px;
     --ph-gap: 14px;
-    --ph-header-h: 56px;
     --ph-row-h: 42px;
     --ph-logo: 28px;
-  }
-  .ph-header {
-    gap: 4px;
-    padding-right: 0;
-  }
-  .ph-emblem {
-    width: 30px;
-    height: 30px;
-    margin: 0 10px 0 12px;
-  }
-  .ph-field-block {
-    min-width: 0;
-    padding: 6px 12px 4px;
-  }
-  .ph-field-value {
-    font-size: 16px;
   }
   .ph-pair {
     grid-template-columns: 1fr;
@@ -635,25 +498,10 @@
   }
 }
 
-/* 窄屏手机（useIsMobile 判定）：入口收成 RM 顶栏的圆形图标按钮 */
-.ph-login--compact {
-  width: 48px;
-  height: 48px;
-  padding: 0;
-  justify-content: center;
-  gap: 0;
-  border-radius: 50%;
-}
-.ph-login--compact svg {
-  width: 26px;
-  height: 26px;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .ph-bar span,
   .ph-event,
   .ph-entry,
-  .ph-login::after,
   .ph-action {
     transition: none;
   }

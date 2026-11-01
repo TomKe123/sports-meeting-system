@@ -14,216 +14,66 @@
   overflow: visible;
 }
 
-.radar-ring {
-  fill: rgba(255, 255, 255, 0.02);
-  stroke: var(--sm-line-strong);
-  stroke-width: 1;
+/* ECharts 暗色雷达：交替灰色环带、浅灰分割线与轴线 */
+.radar-band {
+  fill: rgba(255, 255, 255, 0.06);
 }
 
-.radar-ring.is-alt {
-  fill: rgba(120, 170, 255, 0.05);
+.radar-band.is-alt {
+  fill: rgba(255, 255, 255, 0.16);
+}
+
+.radar-ring {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.32);
+  stroke-width: 1;
 }
 
 .radar-spoke {
-  stroke: var(--sm-line);
+  stroke: rgba(255, 255, 255, 0.32);
   stroke-width: 1;
 }
 
-.radar-tick {
-  fill: var(--sm-text-muted);
-  font-size: 10px;
-}
-
 .radar-axis-label {
-  fill: var(--sm-text);
-  font-size: 14px;
+  fill: #cfcfcf;
+  font-size: 13px;
 }
 
 .radar-series circle {
   cursor: default;
 }
 
+/* legend：圆角色块 + 白字 */
 .radar-legend {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 6px 16px;
+  gap: 6px 14px;
   margin-top: 4px;
-  font-size: 13px;
-  color: var(--sm-text);
+  font-size: 12px;
+  color: #fff;
 }
 
 .radar-legend-item {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .radar-legend-swatch {
-  width: 22px;
-  height: 12px;
-  border: 2px solid;
-  border-radius: 3px;
+  width: 25px;
+  height: 14px;
+  border: 0 solid;
+  border-radius: 4px;
 }
 
 .radar-legend-swatch.is-dashed {
+  border-width: 2px;
   border-style: dashed;
+  background: transparent !important;
 }
 
-/* ==== 面板 ==== */
-
-.radar-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 16px;
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-@media (min-width: 992px) {
-  .radar-panel {
-    grid-template-columns: minmax(360px, 5fr) minmax(0, 6fr);
-    align-items: start;
-  }
-}
-
-.radar-preset-tag {
-  padding: 0 10px;
-  line-height: 22px;
-  font-size: 12px;
-  color: #1a1204;
-  background: var(--sm-gold);
-  border-radius: 2px;
-}
-
-.radar-hint {
-  font-size: 12px;
-  color: var(--sm-text-secondary);
-}
-
-.radar-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 10px 12px;
-  margin-bottom: 4px;
-}
-
-.radar-control {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1 1 160px;
-  min-width: 0;
-}
-
-.radar-control.is-inline {
-  flex: 0 0 auto;
-  flex-direction: row;
-  align-items: center;
-  gap: 6px;
-  height: 32px;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.radar-control-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--sm-text-secondary);
-}
-
-.radar-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.radar-select {
-  width: 100%;
-}
-
-/* ==== 数据表 ==== */
-
-.radar-table-scroll {
-  overflow-x: auto;
-}
-
-.radar-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 3px;
-  font-variant-numeric: tabular-nums;
-  font-size: 13px;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.radar-table th,
-.radar-table td {
-  padding: 6px 8px;
-  font-weight: normal;
-}
-
-.radar-table thead th {
-  font-size: 12px;
-  color: var(--sm-text-secondary);
-}
-
-.radar-table tbody tr > * {
-  background: linear-gradient(
-    180deg,
-    rgba(210, 232, 248, 0.055),
-    rgba(255, 255, 255, 0.025)
-  );
-}
-
-.radar-table .is-name {
-  position: sticky;
-  left: 0;
-  z-index: 1;
-  text-align: left;
-  background-color: #0b1d33;
-}
-
-.radar-table thead .is-name {
-  background: #0b1d33;
-}
-
-.radar-table tbody tr > :first-child {
-  border-left: 3px solid transparent;
-  border-radius: 4px 0 0 4px;
-}
-
-.radar-table tbody tr > :last-child {
-  border-radius: 0 4px 4px 0;
-}
-
-.radar-table tr.is-single > :first-child {
-  border-left-color: #ffb300;
-}
-
-.radar-table tr.is-red > :first-child {
-  border-left-color: #e53935;
-}
-
-.radar-table tr.is-blue > :first-child {
-  border-left-color: #1e88e5;
-}
-
-.radar-table tr.is-single > *,
-.radar-table tr.is-red > *,
-.radar-table tr.is-blue > * {
-  background-color: rgba(255, 255, 255, 0.06);
-}
-
-.radar-table tr.is-average > * {
-  color: var(--sm-text-secondary);
-}
+/* ==== 维度表头 / 数值标注（分析弹层使用） ==== */
 
 .radar-th {
   display: inline-flex;
@@ -242,18 +92,6 @@
   opacity: 0.6;
 }
 
-.radar-name {
-  display: block;
-  max-width: 9em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.radar-table .bv-sub {
-  display: block;
-  font-size: 11px;
-}
-
 .radar-empty {
   color: var(--sm-text-muted);
 }
@@ -267,11 +105,6 @@
   border: 1px solid rgba(255, 200, 87, 0.5);
   border-radius: 2px;
   vertical-align: 1px;
-}
-
-.radar-note p {
-  margin: 0 0 4px;
-  line-height: 1.6;
 }
 
 .radar-sr-only {
@@ -321,12 +154,6 @@
   padding-left: 18px;
   font-size: 12px;
   color: var(--sm-red);
-}
-
-/* 覆盖桌面对阵图中小组面板的最大宽度 */
-.bracket-view .radar-panel .bv-panel {
-  max-width: none;
-  min-width: 0;
 }
 
 .radar-stats-row {

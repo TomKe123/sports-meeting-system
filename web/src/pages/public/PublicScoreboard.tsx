@@ -14,14 +14,22 @@ import BlurText from "../../components/BlurText";
 import PublicHomeBoard from "../../components/PublicHomeBoard";
 import ScoreboardDialogs from "../../components/ScoreboardDialogs";
 import LoginDialog from "../../components/LoginDialog";
+import PublicTopBar from "../../components/public/PublicTopBar";
+import type { ParticipantPick } from "../../components/public/PublicSearchDialog";
+import { TeamAnalysisSheet } from "../../components/bracket/AnalysisSheets";
 import ScoreboardSettingsModal from "../../components/ScoreboardSettingsModal";
 import type { ScoreboardVoiceOption } from "../../components/ScoreboardSettingsModal";
 import { publicAPI } from "../../api/public";
-import { Competition, PointDetail, Score, Registration } from "../../types";
+import {
+  Bracket,
+  BracketDetail,
+  Competition,
+  PointDetail,
+  Score,
+  Registration,
+} from "../../types";
 import { handleResp, handleRespWithoutNotify } from "../../utils/handleResp";
 import { getRankingColor, isClassScoredType } from "../../utils/competition";
-import { useAuth } from "../../contexts/AuthContext";
-import { useWebsite } from "../../contexts/WebsiteContext";
 import {
   buildAnimationStepAnnouncement,
   buildCompetitionAnnouncementIntro,
@@ -73,6 +81,7 @@ const PublicScoreboard: React.FC = () => {
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasSavedSettingsRef = useRef(false);
 
+  // 隐藏入口：在“关于”弹窗中连续点击校徽 5 次打开看板设置
   const handleTitleClick = useCallback(() => {
     clickCountRef.current += 1;
 
@@ -84,26 +93,33 @@ const PublicScoreboard: React.FC = () => {
       setSettingsModalOpen(true);
       clickCountRef.current = 0;
       clickTimerRef.current = null;
-      return;
+      return true;
     }
 
     clickTimerRef.current = setTimeout(() => {
       clickCountRef.current = 0;
       clickTimerRef.current = null;
     }, 2000);
+    return false;
   }, []);
 
-  // 是否存在公开的对阵图（有才显示入口）
-  const [hasBrackets, setHasBrackets] = useState(false);
+  // 已公开的对阵图：顶栏“页面”选择与队伍搜索
+  const [brackets, setBrackets] = useState<Bracket[]>([]);
   useEffect(() => {
     publicAPI
       .getBrackets()
-      .then((resp) =>
-        handleRespWithoutNotify(resp, (data) =>
-          setHasBrackets(data.length > 0),
-        ),
-      );
+      .then((resp) => handleRespWithoutNotify(resp, setBrackets));
   }, []);
+
+  // 首页的队伍分析：通过搜索挑选的队伍
+  const [analysisPick, setAnalysisPick] = useState<{
+    detail: BracketDetail;
+    participantId: number;
+  } | null>(null);
+  const [analysisOpen, setAnalysisOpen] = useState(false);
+  const analysisName = analysisPick?.detail.participants.find(
+    (p) => p.id === analysisPick.participantId,
+  )?.name;
 
   useEffect(() => {
     return () => {
@@ -160,7 +176,21 @@ const PublicScoreboard: React.FC = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, isAdmin } = useAuth();
+
+  // 搜索“选中”：跳转到对应对阵图并选中该队伍
+  const handlePickParticipant = useCallback(
+    (pick: ParticipantPick) => {
+      navigate(`/brackets/${pick.bracketId}`, { state: { pick } });
+    },
+    [navigate],
+  );
+  const handleAnalyzeParticipant = useCallback(
+    (detail: BracketDetail, participantId: number) => {
+      setAnalysisPick({ detail, participantId });
+      setAnalysisOpen(true);
+    },
+    [],
+  );
   const [loginModalOpen, setLoginModalOpen] = useState(
     () =>
       Boolean((location.state as { openLogin?: boolean } | null)?.openLogin) ||
@@ -187,15 +217,6 @@ const PublicScoreboard: React.FC = () => {
     }
   }, [location.search, location.state, navigate]);
 
-  // 已登录时首页按钮直接进入对应后台，不再重复弹出登录框。
-  const handleAccountClick = useCallback(() => {
-    if (!isAuthenticated) {
-      setLoginModalOpen(true);
-      return;
-    }
-    navigate(isAdmin ? "/admin" : "/student");
-  }, [isAdmin, isAuthenticated, navigate]);
-
   const [lastNotifiedCompetitionId, setLastNotifiedCompetitionId] = useState<
     number | null
   >(null);
@@ -213,9 +234,6 @@ const PublicScoreboard: React.FC = () => {
     typeof setTimeout
   > | null>(null);
   const [isManualReplay, setIsManualReplay] = useState(false); // 标记是否是手动重播
-
-  // 当前运动会届次名称
-  const { event_name: eventName } = useWebsite();
 
   const stopAnnouncement = useCallback(() => {
     speechRequestIdRef.current += 1;
@@ -1196,7 +1214,19 @@ const PublicScoreboard: React.FC = () => {
 
       {/* 首页三栏看板 */}
       <PublicHomeBoard
-        eventName={eventName}
+        topBar={
+          <PublicTopBar
+            brackets={brackets}
+            analyzeLabel={
+              analysisName ? `分析队伍 ${analysisName}` : "请先通过搜索选择队伍"
+            }
+            onAnalyze={analysisPick ? () => setAnalysisOpen(true) : undefined}
+            onPickParticipant={handlePickParticipant}
+            onAnalyzeParticipant={handleAnalyzeParticipant}
+            onLogin={() => setLoginModalOpen(true)}
+            onSecretClick={handleTitleClick}
+          />
+        }
         topClasses={stats.topClasses}
         topStudents={stats.topStudents}
         completedCount={stats.completedCount}
@@ -1208,11 +1238,16 @@ const PublicScoreboard: React.FC = () => {
         onViewCompetition={handleViewCompetitionDetail}
         onOpenCompleted={handleViewCompletedCompetitions}
         onOpenPending={handleViewPendingCompetitions}
-        onTitleClick={handleTitleClick}
-        isLoggedIn={isAuthenticated}
-        onAccountClick={handleAccountClick}
-        onOpenBrackets={hasBrackets ? () => navigate("/brackets") : undefined}
       />
+
+      {analysisPick && (
+        <TeamAnalysisSheet
+          detail={analysisPick.detail}
+          participantId={analysisPick.participantId}
+          open={analysisOpen}
+          onClose={() => setAnalysisOpen(false)}
+        />
+      )}
 
       <ScoreboardSettingsModal
         open={settingsModalOpen}

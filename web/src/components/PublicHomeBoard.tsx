@@ -5,7 +5,6 @@ import type {
   Competition,
   StudentPointsSummary,
 } from "../types";
-import { useIsMobile } from "../utils/mobile";
 import "./PublicHomeBoard.css";
 
 const UPCOMING_WINDOW_MS = 60 * 60 * 1000;
@@ -46,16 +45,9 @@ function RankBadge({ rank }: { rank: number }) {
   );
 }
 
-// 顶栏图标（Material Design Icons 路径，与 RM Schedule 的 mdi 图标同源）
-const MDI_TOURNAMENT =
-  "M2 2v2h5v4H2v2h5c1.11 0 2-.89 2-2V7h5v10H9v-1c0-1.11-.89-2-2-2H2v2h5v4H2v2h5c1.11 0 2-.89 2-2v-1h5c1.11 0 2-.89 2-2v-4h6v-2h-6V7c0-1.11-.89-2-2-2H9V4c0-1.11-.89-2-2-2H2Z";
-const MDI_LOGIN =
-  "M11 7 9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5m9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14Z";
-const MDI_ACCOUNT =
-  "M12 2a10 10 0 0 0-10 10 10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2M7.07 18.28c.43-.9 3.05-1.78 4.93-1.78s4.5.88 4.93 1.78A7.893 7.893 0 0 1 12 20c-1.86 0-3.57-.64-4.93-1.72m11.29-1.45c-1.43-1.74-4.9-2.33-6.36-2.33s-4.93.59-6.36 2.33A7.95 7.95 0 0 1 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8c0 1.82-.62 3.5-1.64 4.83M12 6c-1.94 0-3.5 1.56-3.5 3.5S10.06 13 12 13s3.5-1.56 3.5-3.5S13.94 6 12 6m0 5a1.5 1.5 0 0 1-1.5-1.5A1.5 1.5 0 0 1 12 8a1.5 1.5 0 0 1 1.5 1.5A1.5 1.5 0 0 1 12 11Z";
-
 interface PublicHomeBoardProps {
-  eventName?: string;
+  // 共用的 RM 顶栏（PublicTopBar）
+  topBar: React.ReactNode;
   topClasses: ClassPointsSummary[];
   topStudents: StudentPointsSummary[];
   completedCount: number;
@@ -67,15 +59,10 @@ interface PublicHomeBoardProps {
   onViewCompetition: (competition: Competition) => void;
   onOpenCompleted: () => void;
   onOpenPending: () => void;
-  onTitleClick: () => void;
-  isLoggedIn: boolean;
-  onAccountClick: () => void;
-  // 有公开对阵图时展示入口
-  onOpenBrackets?: () => void;
 }
 
 export default function PublicHomeBoard({
-  eventName,
+  topBar,
   topClasses,
   topStudents,
   completedCount,
@@ -87,16 +74,11 @@ export default function PublicHomeBoard({
   onViewCompetition,
   onOpenCompleted,
   onOpenPending,
-  onTitleClick,
-  isLoggedIn,
-  onAccountClick,
-  onOpenBrackets,
 }: PublicHomeBoardProps) {
   const totalCount = completedCount + pendingCount;
   const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
   const maxClassPoints = topClasses[0]?.total_points || 1;
   const maxStudentPoints = topStudents[0]?.total_points || 1;
-  const isMobile = useIsMobile();
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -124,64 +106,7 @@ export default function PublicHomeBoard({
 
   return (
     <div className="ph-shell">
-      <header className="ph-header sm-glass">
-        <div className="ph-brand" onClick={onTitleClick} role="presentation">
-          <img className="ph-emblem" src="/school-emblem.svg" alt="行知校徽" />
-          {isMobile ? (
-            <div className="ph-field-block ph-field-block--grow">
-              <span className="ph-field-label">上海市行知中学</span>
-              <h1 className="ph-field-value">
-                {eventName?.trim() || "运动会"}
-              </h1>
-            </div>
-          ) : (
-            <>
-              <div className="ph-field-block">
-                <span className="ph-field-label">学校</span>
-                <span className="ph-field-value ph-school">上海市行知中学</span>
-              </div>
-              <div className="ph-field-block ph-field-block--grow">
-                <span className="ph-field-label">赛事</span>
-                <h1 className="ph-field-value">
-                  {eventName?.trim() || "运动会"}
-                </h1>
-              </div>
-            </>
-          )}
-        </div>
-        <div className="ph-side">
-          {onOpenBrackets && (
-            <button
-              type="button"
-              className={`ph-login${isMobile ? " ph-login--compact" : ""}`}
-              onClick={onOpenBrackets}
-              aria-label="对阵图"
-              title={isMobile ? "对阵图" : undefined}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d={MDI_TOURNAMENT} />
-              </svg>
-              {!isMobile && "对阵图"}
-            </button>
-          )}
-          <button
-            type="button"
-            className={`ph-login${isMobile ? " ph-login--compact" : ""}`}
-            onClick={onAccountClick}
-            title={isLoggedIn ? "进入系统" : "登录"}
-            aria-label={isLoggedIn ? "进入系统" : "登录"}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d={isLoggedIn ? MDI_ACCOUNT : MDI_LOGIN} />
-            </svg>
-            {!isMobile && (
-              <span className="ph-login-label">
-                {isLoggedIn ? "进入系统" : "登录"}
-              </span>
-            )}
-          </button>
-        </div>
-      </header>
+      {topBar}
 
       <main className="ph-layout">
         <div className="ph-pair">

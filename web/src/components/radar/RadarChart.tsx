@@ -41,6 +41,19 @@ const pointAt = (i: number, count: number, r: number) => {
 const toPoints = (list: { x: number; y: number }[]) =>
   list.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
 
+const ringPoints = (count: number, ring: number) =>
+  Array.from({ length: count }, (_, i) =>
+    pointAt(i, count, (RADIUS * ring) / MAX_VALUE),
+  );
+
+// 环带（外环减内环，evenodd 填充），与 ECharts splitArea 一致
+const bandPath = (count: number, ring: number) => {
+  const toD = (list: { x: number; y: number }[]) =>
+    `M${list.map((p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join("L")}Z`;
+  const outer = toD(ringPoints(count, ring));
+  return ring > 1 ? outer + toD(ringPoints(count, ring - 1)) : outer;
+};
+
 const clamp = (v: number) => Math.min(MAX_VALUE, Math.max(0, v));
 
 /** 长标签按字数折成两行 */
@@ -79,16 +92,20 @@ const RadarChart: React.FC<RadarChartProps> = ({ dimensions, series }) => {
         aria-label={`实力雷达图（满分 5 分）。${summary}`}
         className="radar-chart-svg"
       >
-        {/* 网格环：由外向内绘制，交替填充增加层次 */}
-        {[...RINGS].reverse().map((ring) => (
+        {/* 网格：ECharts radar splitArea 交替灰带 + splitLine */}
+        {RINGS.map((ring) => (
+          <path
+            key={`band-${ring}`}
+            d={bandPath(count, ring)}
+            fillRule="evenodd"
+            className={`radar-band${ring % 2 === 0 ? " is-alt" : ""}`}
+          />
+        ))}
+        {RINGS.map((ring) => (
           <polygon
             key={ring}
-            points={toPoints(
-              dimensions.map((_, i) =>
-                pointAt(i, count, (RADIUS * ring) / MAX_VALUE),
-              ),
-            )}
-            className={`radar-ring${ring % 2 === 0 ? " is-alt" : ""}`}
+            points={toPoints(ringPoints(count, ring))}
+            className="radar-ring"
           />
         ))}
         {dimensions.map((d, i) => {
@@ -104,17 +121,6 @@ const RadarChart: React.FC<RadarChartProps> = ({ dimensions, series }) => {
             />
           );
         })}
-        {/* 刻度值：沿第一条轴线 */}
-        {RINGS.map((ring) => (
-          <text
-            key={ring}
-            x={CX + 4}
-            y={CY - (RADIUS * ring) / MAX_VALUE + 4}
-            className="radar-tick"
-          >
-            {ring}
-          </text>
-        ))}
 
         {series.map((s) => {
           const points = dimensions.map((d, i) =>
@@ -131,7 +137,7 @@ const RadarChart: React.FC<RadarChartProps> = ({ dimensions, series }) => {
                 fill={s.color}
                 fillOpacity={0.2}
                 stroke={s.color}
-                strokeWidth={2}
+                strokeWidth={1.5}
                 strokeLinejoin="round"
                 strokeDasharray={s.dashed ? "6 4" : undefined}
               />
@@ -143,8 +149,8 @@ const RadarChart: React.FC<RadarChartProps> = ({ dimensions, series }) => {
                     key={d.key}
                     cx={points[i].x}
                     cy={points[i].y}
-                    r={empty ? 4 : 3.5}
-                    fill={empty ? "#0a1a2e" : s.color}
+                    r={empty ? 3.5 : 3}
+                    fill={empty ? "#212121" : s.color}
                     stroke={s.color}
                     strokeWidth={empty ? 1.5 : 0}
                   >
@@ -197,7 +203,7 @@ const RadarChart: React.FC<RadarChartProps> = ({ dimensions, series }) => {
             <span key={s.name} className="radar-legend-item">
               <span
                 className={`radar-legend-swatch${s.dashed ? " is-dashed" : ""}`}
-                style={{ borderColor: s.color, background: `${s.color}33` }}
+                style={{ borderColor: s.color, background: s.color }}
                 aria-hidden
               />
               {s.name}

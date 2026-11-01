@@ -541,7 +541,7 @@ const BracketDetail: React.FC = () => {
       <Card title="对阵图">
         {generated && (
           <Text type="secondary" style={{ display: "block", marginBottom: 12 }}>
-            点击双方已确定的比赛录入结果；修改结果后，后续比赛会自动更新。
+            点击比赛或队伍打开菜单，选择「录入结果」；修改结果后，后续比赛会自动更新。
           </Text>
         )}
         <BracketView detail={detail} onMatchClick={setEditingMatch} />

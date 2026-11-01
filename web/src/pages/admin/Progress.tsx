@@ -1368,7 +1368,7 @@ const Progress: React.FC = () => {
                 style={{ marginBottom: 16 }}
                 message={
                   selectedCompetition.status === "in_progress"
-                    ? "点击双方已确定的比赛录入比分；全部完赛后自动生成名次并计入积分。"
+                    ? "点击比赛或队伍打开菜单，选择「录入结果」录入比分；全部完赛后自动生成名次并计入积分。"
                     : selectedCompetition.status === "completed"
                       ? "对阵已完赛，名次已计入积分。如需修改比分，请先退回进行中。"
                       : "开始比赛后即可在此录入比分；比赛时间与地点可随时修改。"
